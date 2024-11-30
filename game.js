@@ -91,7 +91,7 @@ function update() {
     if (head.x === cheese.x && head.y === cheese.y) {
         rat.unshift(head); // Add the new head to the front
         cheeseEaten++; // Increment the cheese counter
-        cheeseCounter.innerText = `Cheese Eaten: ${cheeseEaten}`; // Update the counter display
+        cheeseCounter.innerText = `Käse gesammelt: ${cheeseEaten}`; // Update the counter display
         placeCheese(); // Place a new cheese
     } else {
         rat.unshift(head); // Add the new head
@@ -120,7 +120,7 @@ restartButton.addEventListener('click', () => {
     rat = [{x: 100, y: 100}, {x: 80, y: 100}, {x: 60, y: 100}];
     cheese = {x: 200, y: 200};
     cheeseEaten = 0; // Reset the cheese counter
-    cheeseCounter.innerText = `Cheese Eaten: ${cheeseEaten}`; // Reset the display
+    cheeseCounter.innerText = `Käse gesammelt: ${cheeseEaten}`; // Reset the display
     restartButton.style.display = 'none'; // Hide the button again
     clearInterval(gameInterval); // Clear the old game loop interval
     startGame(); // Start the game again
