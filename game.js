@@ -10,6 +10,7 @@ const initialLength = 3; // Initial length of the rat (snake)
 // Snake initial position and direction
 let rat = [{x: 100, y: 100}, {x: 80, y: 100}, {x: 60, y: 100}];
 let direction = 'right';
+let nextDirection = 'right'; // To store the next intended direction
 
 // Cheese position
 let cheese = {x: 200, y: 200};
@@ -41,10 +42,11 @@ document.body.appendChild(cheeseCounter);
 
 // Listen for keyboard input to control the rat
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowUp' && direction !== 'down') direction = 'up';
-    if (e.key === 'ArrowDown' && direction !== 'up') direction = 'down';
-    if (e.key === 'ArrowLeft' && direction !== 'right') direction = 'left';
-    if (e.key === 'ArrowRight' && direction !== 'left') direction = 'right';
+    // Prevent immediate reversal of direction
+    if (e.key === 'ArrowUp' && direction !== 'down') nextDirection = 'up';
+    if (e.key === 'ArrowDown' && direction !== 'up') nextDirection = 'down';
+    if (e.key === 'ArrowLeft' && direction !== 'right') nextDirection = 'left';
+    if (e.key === 'ArrowRight' && direction !== 'left') nextDirection = 'right';
 });
 
 // Draw the game elements
@@ -65,6 +67,9 @@ function draw() {
 // Update the game state
 function update() {
     if (gameOver) return; // Stop the game if it's over
+
+    // Set the direction to the next intended direction (smooth transitions)
+    direction = nextDirection;
 
     // Move the rat based on the direction
     let head = Object.assign({}, rat[0]); // Copy the head of the rat
@@ -91,7 +96,7 @@ function update() {
     if (head.x === cheese.x && head.y === cheese.y) {
         rat.unshift(head); // Add the new head to the front
         cheeseEaten++; // Increment the cheese counter
-        cheeseCounter.innerText = `Käse gesammelt: ${cheeseEaten}`; // Update the counter display
+        cheeseCounter.innerText = `Cheese Eaten: ${cheeseEaten}`; // Update the counter display
         placeCheese(); // Place a new cheese
     } else {
         rat.unshift(head); // Add the new head
@@ -102,10 +107,23 @@ function update() {
     draw();
 }
 
-// Randomly place the cheese on the canvas
+// Randomly place the cheese on the canvas, ensuring it doesn't overlap with the snake
 function placeCheese() {
-    cheese.x = Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize;
-    cheese.y = Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize;
+    let newCheesePosition;
+    let cheeseIsOnRat = true;
+
+    // Keep checking until the cheese is not on the rat
+    while (cheeseIsOnRat) {
+        newCheesePosition = {
+            x: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize,
+            y: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize
+        };
+
+        // Check if the new cheese position overlaps with any part of the snake
+        cheeseIsOnRat = rat.some(segment => segment.x === newCheesePosition.x && segment.y === newCheesePosition.y);
+    }
+
+    cheese = newCheesePosition;
 }
 
 // Show the restart button when the game ends
@@ -117,10 +135,11 @@ function showRestartButton() {
 restartButton.addEventListener('click', () => {
     gameOver = false;
     direction = 'right';
+    nextDirection = 'right'; // Ensure we reset the next direction as well
     rat = [{x: 100, y: 100}, {x: 80, y: 100}, {x: 60, y: 100}];
     cheese = {x: 200, y: 200};
     cheeseEaten = 0; // Reset the cheese counter
-    cheeseCounter.innerText = `Käse gesammelt: ${cheeseEaten}`; // Reset the display
+    cheeseCounter.innerText = `Cheese Eaten: ${cheeseEaten}`; // Reset the display
     restartButton.style.display = 'none'; // Hide the button again
     clearInterval(gameInterval); // Clear the old game loop interval
     startGame(); // Start the game again
